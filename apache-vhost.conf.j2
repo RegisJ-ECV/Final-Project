@@ -1,0 +1,12 @@
+<VirtualHost *:80>
+  ServerName {{ wp_site_url }}
+  DocumentRoot /var/www/html/wordpress
+
+  <Directory /var/www/html/wordpress>
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  ErrorLog ${APACHE_LOG_DIR}/{{ wp_site_url }}-error.log
+  CustomLog ${APACHE
