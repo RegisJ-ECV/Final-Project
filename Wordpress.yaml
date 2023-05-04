@@ -9,8 +9,8 @@
     wp_db_password: finaldb_password
     wp_admin_user: admin
     wp_admin_password: admin_password
-    wp_site_title: "final"
-    wp_site_url: "final.com"
+    wp_site_title: "ecvmspintern"
+    wp_site_url: "https://ecvmspintern.wordpress.com/"
 
   tasks:
     # Install required packages
