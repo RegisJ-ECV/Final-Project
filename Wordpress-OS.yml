@@ -13,21 +13,24 @@
     - name: Install packages required for WordPress
       package:
         name:
-          - apache2
-          - mysql-server
-          - php
-          - libapache2-mod-php
-          - php-mysql
+        - apache2
+        - mysql-server
+        - php7.2-mysql
+        - php7.2
+        - libapache2-mod-php7.2
+        - python-mysqldb
         state: present
       when: ansible_os_family == 'Debian'
 
     - name: Install packages required for WordPress
       package:
         name:
-          - httpd
-          - mysql-server
-          - php
-          - php-mysqlnd
+          - httpd24
+          - php71
+          - mysql55-server
+          - php71-mysqlnd
+          - php71-mbstring
+          - MySQL-python27
         state: present
       when: ansible_os_family == 'RedHat'
 
