@@ -27,7 +27,7 @@
         name:
           - httpd
           - php
-          - mysql-server
+          - mysql-community-server
           - php-mysqlnd
           - php-mbstring
           - MySQL-pythons
