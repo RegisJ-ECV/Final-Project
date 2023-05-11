@@ -22,12 +22,25 @@
         state: present
       when: ansible_os_family == 'Debian'
 
+    - name: Download sources
+      get_url:
+        url: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+        dest: /opt/mysql
+
+    - name: Install package
+      yum:
+        name: /opt/mysql/mysql-community-release-el7-5.noarch.rpm
+        state: present
+
+    - name: Install MySQL
+      yum: name=mysql-server state=installed
+
     - name: Install packages required for WordPress
       package:
         name:
           - httpd
           - php
-          - mysql-community-server
+          - mysql-server
           - php-mysqlnd
           - php-mbstring
           - MySQL-pythons
