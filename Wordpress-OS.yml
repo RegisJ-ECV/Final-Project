@@ -51,16 +51,16 @@
         state: started
         enabled: true
 
-    - name: Create WordPress database
-      mysql_db:
-        name: "{{ db_name }}"
-        state: present
-
     - name: Create WordPress database user
       mysql_user:
         name: "{{ db_user }}"
         password: "{{ db_password }}"
         priv: "{{ db_name }}.*:ALL"
+        state: present
+
+    - name: Create WordPress database
+      mysql_db:
+        name: "{{ db_name }}"
         state: present
 
     - name: Set up WordPress config file
