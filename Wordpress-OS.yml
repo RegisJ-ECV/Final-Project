@@ -26,11 +26,11 @@
       package:
         name:
           - httpd
-          - php71
-          - mysql55-server
-          - php71-mysqlnd
-          - php71-mbstring
-          - MySQL-python27
+          - php
+          - mysql-server
+          - php-mysqlnd
+          - php-mbstring
+          - MySQL-pythons
         state: present
       when: ansible_os_family == 'RedHat'
 
@@ -65,11 +65,6 @@
       mysql_db:
         name: "{{ db_name }}"
         state: present
-
-    - name: Set up WordPress config file
-      template:
-        src: templates/wp-config.php.j2
-        dest: /var/www/html/wordpress/wp-config.php
 
     - name: Download and extract WordPress core files
       get_url:
