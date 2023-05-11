@@ -87,14 +87,11 @@
         owner: www-data
         group: www-data
         recurse: true
-      handlers:
+  handlers:
     - name: enable apache site
-      command: a2ensite {{ wp_site_url }}
-      args:
-        creates: /etc/apache2/sites-enabled/{{ wp_site_url }}
+      command: apache2ctl graceful
       notify:
         - reload apache
-   
     - name: Restart Apache service
       service:
         name: apache2
