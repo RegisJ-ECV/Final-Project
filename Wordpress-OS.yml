@@ -9,7 +9,44 @@
     wp_admin_password: admin_password
     wp_site_title: "Example WordPress Site"
     wp_site_url: "example.com"
+    httpd_packages:
+      - httpd
+      - mod_ssl
+    php_packages:
+      - php
+      - php-mysqlnd
+      - php-fpm
+      - php-gd
+      - php-json
+      - php-mbstring
+      - php-opcache
+      - php-pdo
+      - php-pecl-apcu
+      - php-pecl-imagick
+      - php-pecl-zip
+    mariadb_packages:
+      - mariadb-server
+      - mariadb
   tasks:
+
+    - name: Install Apache packages
+      package:
+        name: "{{ httpd_packages }}"
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install PHP packages
+      package:
+        name: "{{ php_packages }}"
+        state: latest
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install MariaDB packages
+      package:
+        name: "{{ mariadb_packages }}"
+        state: present
+      when: ansible_os_family == 'RedHat'
+
     - name: Install packages required for WordPress
       package:
         name:
@@ -22,30 +59,6 @@
         state: present
       when: ansible_os_family == 'Debian'
 
-    - name: Download sources
-      get_url:
-        url: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
-        dest: /opt/mysql
-
-    - name: Install package
-      yum:
-        name: /opt/mysql/mysql-community-release-el7-5.noarch.rpm
-        state: present
-
-    - name: Install MySQL
-      yum: name=mysql-server state=installed
-
-    - name: Install packages required for WordPress
-      package:
-        name:
-          - httpd
-          - php
-          - mysql-server
-          - php-mysqlnd
-          - php-mbstring
-          - MySQL-pythons
-        state: present
-      when: ansible_os_family == 'RedHat'
 
     - name: Start and enable Apache service
       service:
@@ -66,19 +79,52 @@
         name: mysql
         state: started
         enabled: true
-
+      when: ansible_os_family == 'Debian'
+      
+    - name: Start and enable MariaDB service
+      service:
+        name: mariadb
+        state: started
+        enabled: true
+      when: ansible_os_family == 'RedHat'  
+      
     - name: Create WordPress database user
       mysql_user:
         name: "{{ db_user }}"
         password: "{{ db_password }}"
         priv: "{{ db_name }}.*:ALL"
         state: present
-
+      when: ansible_os_family == 'Debian'
+      
     - name: Create WordPress database
       mysql_db:
         name: "{{ db_name }}"
         state: present
+      when: ansible_os_family == 'Debian'
+      
+##    - name: Create WordPress database user two
+##      mariadb_user:
+##        name: "{{ db_user }}"
+##        password: "{{ db_password }}"
+##        priv: "{{ db_name }}.*:ALL"
+##        state: present
+##      when: ansible_os_family == 'RedHat'
+      
+##    - name: Create WordPress database two
+##      mariadb_db:
+##        name: "{{ db_name }}"
+##        state: present
+##      when: ansible_os_family == 'RedHat'
 
+    - name: Create WordPress directory
+      file:
+        path: /var/www/html/wordpress
+        state: directory
+    
+    - name: Extract WordPress files
+      command: tar xzf /tmp/wordpress.tar.gz --strip-components=1 -C /var/www/html/wordpress
+
+      
     - name: Download and extract WordPress core files
       get_url:
         url: "https://wordpress.org/latest.tar.gz"
@@ -86,15 +132,24 @@
       register: download_wordpress
 
     - name: Extract WordPress core files
-      command: "tar xzf /tmp/wordpress.tar.gz --strip-components=1 -C /var/www/html/wordpress"
+      command: "tar xzf /tmp/wordpress.tar.gz --strip-components=1 -C/var/www/html/wordpress"
+      args:
+        warn: false
       when: download_wordpress is succeeded
+      
+    - name: Update PHP
+      apt:
+        name: php
+        state: latest
 
-    - name: Set ownership of WordPress directory
-      file:
-        path: /var/www/html/wordpress
-        owner: www-data
-        group: www-data
-        recurse: true
+
+##    - name: Set ownership of WordPress directory  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDpCHNrC05WXx/AvoRe2+D2M2d0oUwv/iqJx27kRp0WJBrHHVsQG2orEJATVschXUzP+2NgRYPEgAbnQEExM5GHc19g9rSGryiou0pomcsm9I6DU7F52lDyrFJN3hop+doM9b0IMafcCoB8SZJ8srr+SWkNIM21QaQWVF3FPISv0e78pEC3nqPeRW8FTaAi$
+##      file:  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDpCHNrC05WXx/AvoRe2+D2M2d0oUwv/iqJx27kRp0WJBrHHVsQG2orEJATVschXUzP+2NgRYPEgAbnQEExM5GHc19g9rSGryiou0pomcsm9I6DU7F52lDyrFJN3hop+doM9b0IMafcCoB8SZJ8srr+SWkNIM21QaQWVF3FPISv0e78pEC3nqPeRW8FTaAi$
+
+##        path: /var/www/html/wordpress
+##        owner: www-data
+##        group: www-data
+##        recurse: true
   handlers:
     - name: enable apache site
       command: apache2ctl graceful
